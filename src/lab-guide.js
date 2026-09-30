@@ -1,0 +1,35 @@
+/* ===================== QUAL TESTE USAR? ===================== */
+const TW={obj:null,g:null,pair:null,y:null,assoc:null,pred:null};
+const TWMAP={"cmp|1|-|norm":"t1","cmp|1|-|nonn":"w1","cmp|1|-|cat":"bin","cmp|2|ind|norm":"tind","cmp|2|ind|nonn":"mw","cmp|2|ind|cat":"chi","cmp|2|par|norm":"tpar","cmp|2|par|nonn":"wsr","cmp|2|par|cat":"mcn","cmp|3|ind|norm":"anova","cmp|3|ind|nonn":"kw","cmp|3|ind|cat":"chi","cmp|3|par|norm":"rm","cmp|3|par|nonn":"fr","cmp|3|par|cat":"cochran","assoc|pear":"pear","assoc|spear":"spear","assoc|chi":"chi","assoc|mcn":"mcn","pred|lin":"lin","pred|log":"log","time":"km","norm":"sw"};
+const GTAB=[["Comparar uma média com um valor de referência","1 numérica","t1","w1"],["Comparar uma proporção com uma referência","1 sim/não","bin",null],["Comparar 2 grupos independentes","numérica + 2 grupos","tind","mw"],["Comparar 2 momentos nas mesmas pessoas","numérica, 2 momentos","tpar","wsr"],["Comparar ≥ 3 grupos independentes","numérica + 3 ou mais grupos","anova","kw"],["Comparar ≥ 3 momentos nas mesmas pessoas","numérica, 3 ou mais momentos","rm","fr"],["Associação entre 2 variáveis numéricas","2 numéricas ou ordinais","pear","spear"],["Associação entre 2 categóricas","2 categóricas independentes","chi","fisher"],["Mudança em sim/não nas mesmas pessoas","sim/não, 2 momentos","mcn",null],["Prever um desfecho numérico","Y numérica","lin",null],["Prever um desfecho sim/não","Y sim/não","log",null],["Tempo até um evento","tempo + evento/censura","km",null],["Checar se os dados são normais","1 numérica","sw",null]];
+LAB("guia","Inferencial","Qual teste usar?",`
+<div class="intro"><span class="eyebrow">Inferencial</span><h2>Qual teste usar?</h2><p>Diga o que você quer comparar e que tipo de dado você tem. O guia indica o teste adequado, a alternativa e abre o teste no laboratório, pronto para experimentar.</p></div>
+<div class="grid two">
+ <div class="card"><div class="card-h"><h3>Responda às perguntas</h3><button class="more-btn" data-learn="teste">Saiba mais</button></div><div class="flow" id="tw"></div><div class="row" style="margin-top:12px"><button class="btn small" id="twReset">Recomeçar</button></div></div>
+ <div class="card" id="twCard"><div class="card-h"><h3>Teste indicado</h3></div><div id="twRes"></div></div>
+ <div class="card wide"><div class="card-h"><h3>Tabela completa</h3><button class="more-btn" data-learn="pressup">Pressupostos</button></div>
+  <p class="lede">Toque no nome de um teste para abri-lo no laboratório.</p><div class="tw" id="twTable"></div></div>
+</div>`,()=>{
+  $("tw").addEventListener("click",e=>{const b=e.target.closest("[data-k]");if(!b)return;const [k,v]=b.dataset.k.split(":");TW[k]=v;const reset={obj:["g","pair","y","assoc","pred"],g:["pair","y"],pair:["y"]};(reset[k]||[]).forEach(x=>TW[x]=null);renderTw();if(twKey()&&innerWidth<900)$("twCard").scrollIntoView({behavior:"smooth",block:"start"});});
+  $("twReset").onclick=()=>{Object.keys(TW).forEach(k=>TW[k]=null);renderTw();};
+  document.getElementById("lab-guia").addEventListener("click",e=>{const b=e.target.closest("[data-open]");if(b)openTest(b.dataset.open);});
+  const tb=id=>id?`<button class="chip" data-open="${id}">${TESTS[id].name}</button>`:`<span class="mini">—</span>`;
+  $("twTable").innerHTML=`<table class="t"><thead><tr><th>Objetivo</th><th style="text-align:left">Variáveis</th><th style="text-align:left">Paramétrico / principal</th><th style="text-align:left">Não paramétrico / alternativa</th></tr></thead><tbody>${GTAB.map(r=>`<tr><td style="white-space:normal;min-width:170px">${r[0]}</td><td style="text-align:left;white-space:normal">${r[1]}</td><td style="text-align:left">${tb(r[2])}</td><td style="text-align:left">${tb(r[3])}</td></tr>`).join("")}</tbody></table>`;
+},()=>renderTw());
+function openTest(id){if(!TESTS[id])return;go("testes");selectTest(id);window.scrollTo({top:0});}
+function twKey(){if(TW.obj==="cmp"&&TW.y&&(TW.g==="1"||TW.pair))return `cmp|${TW.g}|${TW.g==="1"?"-":TW.pair}|${TW.y}`;if(TW.obj==="assoc"&&TW.assoc)return "assoc|"+TW.assoc;if(TW.obj==="pred"&&TW.pred)return "pred|"+TW.pred;if(TW.obj==="time")return "time";if(TW.obj==="norm")return "norm";return null;}
+function renderTw(){const q=(title,key,opts)=>`<div class="st"><span class="eyebrow">${title}</span><div class="opts">${opts.map(([v,l,s])=>`<button class="opt ${TW[key]===v?"right":""}" data-k="${key}:${v}"><b style="display:block">${l}</b>${s?`<span class="mini">${s}</span>`:""}</button>`).join("")}</div></div>`;
+  let h=q("1. O que você quer fazer?","obj",[["cmp","Comparar","grupos, momentos ou uma referência"],["assoc","Associar","duas variáveis entre si"],["pred","Prever","um desfecho a partir de outra variável"],["time","Tempo até um evento","sobrevida, recidiva, alta"],["norm","Checar normalidade","antes de escolher o teste"]]);
+  if(TW.obj==="cmp"){h+=q("2. Quantos grupos ou momentos?","g",[["1","Um só","comparado a um valor de referência"],["2","Dois",""],["3","Três ou mais",""]]);
+    if(TW.g&&TW.g!=="1")h+=q("3. São as mesmas pessoas?","pair",[["ind","Não: pessoas diferentes","grupos independentes"],["par","Sim: as mesmas pessoas","antes e depois, medidas repetidas"]]);
+    if(TW.g==="1"||TW.pair)h+=q(`${TW.g==="1"?3:4}. Como é o desfecho?`,"y",[["norm","Numérico, aproximadamente normal","ou amostra grande"],["nonn","Numérico assimétrico ou ordinal","escalas, dados com outliers"],["cat","Categórico","sim/não, categorias"]]);}
+  if(TW.obj==="assoc")h+=q("2. Que tipo de variáveis?","assoc",[["pear","Duas numéricas","relação linear, aprox. normais"],["spear","Ordinais ou numéricas assimétricas","ou com outliers"],["chi","Duas categóricas","pessoas diferentes"],["mcn","Uma categórica antes e depois","as mesmas pessoas"]]);
+  if(TW.obj==="pred")h+=q("2. Como é o desfecho?","pred",[["lin","Numérico","ex.: pressão, colesterol"],["log","Sim/não","ex.: diabetes, óbito"]]);
+  $("tw").innerHTML=h;const id=TWMAP[twKey()];let r;
+  if(!id)r=`<p class="note">As respostas levam ao teste. O resultado aparece aqui.</p>`;
+  else if(id==="cochran")r=`<div class="flow"><div class="res"><span class="eyebrow">Teste indicado</span><b>Q de Cochran</b></div><p class="note">Desfecho sim/não medido três ou mais vezes nas mesmas pessoas. Ainda não está no laboratório.</p></div>`;
+  else{const t=TESTS[id],L=LEARN["t_"+id],desc=L?(L[1].match(/<p>(.*?)<\/p>/)||[])[1]:"",ex=L?(L[1].match(/<h4>Exemplo<\/h4><p>(.*?)<\/p>/)||[])[1]:"";
+    r=`<div class="flow"><div class="res"><span class="eyebrow">Teste indicado</span><b style="font-size:24px">${t.name}</b>${t.alt?`<span class="mini" style="display:block;margin-top:6px">Alternativa ${t.np?"paramétrica":"não paramétrica"}: <b>${TESTS[t.alt].name}</b></span>`:""}</div>
+     ${desc?`<p style="margin:0">${desc}</p>`:""}${ex?`<p class="note" style="margin:0"><b>Exemplo:</b> ${ex}</p>`:""}
+     <div class="row"><button class="btn primary" data-open="${id}">Abrir no laboratório</button>${t.alt?`<button class="btn small" data-open="${t.alt}">Abrir ${TESTS[t.alt].name}</button>`:""}<button class="more-btn" data-learn="t_${id}">Saiba mais</button></div></div>`;}
+  $("twRes").innerHTML=r;}

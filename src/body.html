@@ -1,0 +1,22 @@
+<div class="wrap">
+<header class="top">
+  <div class="brand"><h1>STAT <em>LAB</em></h1><p>Criado por André D. Bacchi</p></div>
+  <div class="row"><button class="btn" id="instBtn" aria-label="Instalar o app no celular ou computador"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M3 13h10"/></svg>Instalar</button><button class="btn" data-gloss><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 2.5h8.5v11H4a1.5 1.5 0 0 1 0-3h8.5M6.5 5.5h3.5"/></svg>Glossário</button><button class="btn primary" id="howBtn"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 4c-1.5-1-3.5-1.3-6-1v10c2.5-.3 4.5 0 6 1 1.5-1 3.5-1.3 6-1V3c-2.5-.3-4.5 0-6 1zM8 4v10"/></svg>Como usar</button></div>
+</header>
+<nav class="labnav" aria-label="Seções">
+  <div class="blocks" id="blocks">
+    <button class="blk" data-grp="Descritiva"><b>Estatística descritiva</b><span>Organizar e resumir os dados, e as bases da probabilidade</span></button>
+    <button class="blk" data-grp="Inferencial"><b>Estatística inferencial</b><span>Da amostra para a população: IC e testes</span></button>
+  </div>
+  <div class="subs" id="subs"></div>
+</nav>
+<section class="welcome" id="welcome" hidden aria-label="Boas-vindas">
+  <div><span class="eyebrow">Primeira visita</span><h2>Bem-vindo ao STAT LAB</h2>
+  <ul><li><b>Comece por aqui:</b> a Estatística descritiva, na ordem das telas.</li><li><b>Mexa em tudo:</b> troque exemplos, digite seus números, arraste pontos e veja o que muda.</li><li><b>Travou num símbolo?</b> Abra o <b>Glossário</b>. Cada painel tem um <b>Saiba mais</b>.</li><li><b>No laboratório de testes,</b> comece no modo <b>Essencial</b>.</li></ul></div>
+  <div class="row"><button class="btn primary" id="wStart">Começar por Variáveis</button><button class="btn" id="wClose">Fechar</button></div>
+</section>
+<main id="labs"></main>
+<div class="labfoot" id="labFoot"></div>
+<footer class="sitefoot"><p><b>STAT LAB</b> · versão piloto 0.9 · setembro de 2026</p><p>Ferramenta didática. Não substitui software estatístico em pesquisa.</p><p>André D. Bacchi · licença CC BY 4.0</p></footer>
+</div>
+<div id="sheetRoot"></div>

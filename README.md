@@ -43,3 +43,9 @@ Bacchi AD. *STAT LAB: laboratório prático de estatística para o ensino em sa�
 ## Licença
 
 CC BY 4.0: pode ser usado e adaptado, com atribuição ao autor.
+
+## Como editar
+
+O código-fonte fica em `src/` (um arquivo por laboratório, mais `style.css`, `body.html` e `head.html`).
+Depois de editar, rode `sh build.sh` para gerar o `index.html` e aumente a versão no `sw.js`.
+`tools/` tem os scripts que conferem os testes estatísticos contra scipy/statsmodels.
