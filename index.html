@@ -308,6 +308,7 @@ textarea.data.sm{min-height:54px;font-size:13.5px}
 .resetbox{background:var(--sunk);border-radius:10px;padding:12px 14px;margin-top:14px}
 
 .steps-l{padding-left:20px;display:grid;gap:6px}
+.fora{background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-size:14px}
 kbd{font-family:var(--f-mono);font-size:12px;background:var(--sunk);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
 @media (max-width:420px){header.top .row .btn{padding:7px 11px;font-size:13px}}
 </style>
@@ -2247,9 +2248,25 @@ function platform(){const u=navigator.userAgent||"";if(/iPhone|iPad|iPod/.test(u
 const SC={ios:`<ol class="steps-l"><li>Abra esta página no <b>Safari</b>.</li><li>Toque em <b>Compartilhar</b> <kbd>⬆︎</kbd>.</li><li>Toque em <b>Adicionar à Tela de Início</b>.</li><li>Confirme o nome e toque em <b>Adicionar</b>.</li></ol>`,
  android:`<ol class="steps-l"><li>Abra esta página no <b>Chrome</b>.</li><li>Toque no menu <kbd>⋮</kbd>.</li><li>Toque em <b>Adicionar à tela inicial</b> ou <b>Instalar app</b>.</li><li>Confirme. O ícone aparece junto dos seus apps.</li></ol>`,
  desktop:`<ol class="steps-l"><li><b>Chrome ou Edge:</b> use o ícone de instalar na barra de endereço, ou o menu <kbd>⋮</kbd> → <b>Transmitir, salvar e compartilhar</b> → <b>Instalar página como app</b>.</li><li><b>Safari (Mac):</b> menu <b>Arquivo</b> → <b>Adicionar ao Dock</b>.</li><li><b>Qualquer navegador:</b> salve nos favoritos com <kbd>Ctrl</kbd>+<kbd>D</kbd>.</li></ol>`};
-let deferredInstall=null;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;});window.addEventListener("appinstalled",()=>{deferredInstall=null;toast("STAT LAB instalado");});
+/* Janela em que o app está rodando: "navegador" (aba comum), "propria" (instalado, na janela dele) ou "outra"
+   (aberto dentro de outro app instalado, como o BACCHI LAB). Neste último caso o Android também responde
+   display-mode: standalone, e o botão Instalar sumia para quem ainda não tinha o app: a diferença é de onde a página veio. */
+function janelaApp(k){
+  if(!(matchMedia("(display-mode: standalone)").matches||navigator.standalone===true))return"navegador";
+  let fora=false,marca=false;
+  try{const r=document.referrer&&new URL(document.referrer);fora=!!r&&r.origin===location.origin&&!r.pathname.startsWith(new URL("./",location.href).pathname);}catch(e){}
+  try{if(!document.referrer)localStorage.setItem(k,"1");if(!fora)sessionStorage.setItem(k,"1");marca=localStorage.getItem(k)==="1"||sessionStorage.getItem(k)==="1";}catch(e){}
+  return !fora||marca?"propria":"outra";
+}
+/* Confirmação do próprio navegador, quando ele sabe responder (Chrome no Android, pelo related_applications do manifest). */
+function appInstalado(k){
+  if(!navigator.getInstalledRelatedApps)return Promise.resolve(false);
+  return navigator.getInstalledRelatedApps().then(l=>{if(l.length){try{localStorage.setItem(k,"1");}catch(e){}}return l.length>0;}).catch(()=>false);
+}
+const JAN_K="stat-lab.instalado";let janela=janelaApp(JAN_K);if(janela==="outra")appInstalado(JAN_K).then(ok=>{if(ok)janela="propria";});
+let deferredInstall=null;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;});window.addEventListener("appinstalled",()=>{deferredInstall=null;try{localStorage.setItem(JAN_K,"1");}catch(e){}toast("STAT LAB instalado");});
 $("instBtn").onclick=async()=>{if(deferredInstall){try{deferredInstall.prompt();const r=await deferredInstall.userChoice;deferredInstall=null;if(r&&r.outcome==="accepted")return;}catch(e){}}
-  openSheet("Instalar o STAT LAB",`<p>O STAT LAB pode ficar na tela inicial como um aplicativo, abrir em tela cheia e funcionar sem internet depois da primeira visita.</p><div class="seg" id="platSeg" style="margin:6px 0 10px"><button data-p="ios">iPhone e iPad</button><button data-p="android">Android</button><button data-p="desktop">Computador</button></div><div id="platBody"></div>`);
+  openSheet("Instalar o STAT LAB",`${janela==="outra"?`<p class="fora">Você abriu este app por dentro de outro, como o BACCHI LAB, e daqui não dá para instalar. Toque em <kbd>⋮</kbd> no alto da tela e em <b>Abrir no Chrome</b>; lá, toque de novo em <b>Instalar</b>.</p>`:""}<p>O STAT LAB pode ficar na tela inicial como um aplicativo, abrir em tela cheia e funcionar sem internet depois da primeira visita.</p><div class="seg" id="platSeg" style="margin:6px 0 10px"><button data-p="ios">iPhone e iPad</button><button data-p="android">Android</button><button data-p="desktop">Computador</button></div><div id="platBody"></div>`);
   const set=k=>{$("platBody").innerHTML=SC[k];document.querySelectorAll("#platSeg button").forEach(b=>b.classList.toggle("on",b.dataset.p===k));};$("platSeg").onclick=e=>{const b=e.target.closest("button");if(b)set(b.dataset.p);};set(platform());};
 
 </script>

@@ -280,5 +280,6 @@ textarea.data.sm{min-height:54px;font-size:13.5px}
 .resetbox{background:var(--sunk);border-radius:10px;padding:12px 14px;margin-top:14px}
 
 .steps-l{padding-left:20px;display:grid;gap:6px}
+.fora{background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-size:14px}
 kbd{font-family:var(--f-mono);font-size:12px;background:var(--sunk);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
 @media (max-width:420px){header.top .row .btn{padding:7px 11px;font-size:13px}}
