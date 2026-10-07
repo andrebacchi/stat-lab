@@ -283,3 +283,12 @@ textarea.data.sm{min-height:54px;font-size:13.5px}
 .fora{background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-size:14px}
 kbd{font-family:var(--f-mono);font-size:12px;background:var(--sunk);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
 @media (max-width:420px){header.top .row .btn{padding:7px 11px;font-size:13px}}
+
+/* QR code do app (padrão do BACCHI LAB): grande e sobre branco, para ler de longe quando projetado */
+.qr-wrap{display:grid;gap:12px;justify-items:center;text-align:center;padding-top:14px}
+.qr-wrap p{margin:0}
+.qr-box{width:min(100%,56vh);padding:10px;border-radius:10px;background:#fff;border:1px solid var(--line)}
+.qr-box svg{display:block;width:100%;height:auto}
+.qr-url{font:600 clamp(15px,4vw,20px)/1.3 "IBM Plex Mono",ui-monospace,monospace;overflow-wrap:anywhere;-webkit-user-select:all;user-select:all}
+.qr-acts{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.qr-nota{font-size:12.5px;opacity:.7}

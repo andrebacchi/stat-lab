@@ -1,6 +1,6 @@
 /* STAT LAB — service worker: funciona offline depois da primeira visita.
    Ao publicar uma nova versão do index.html, aumente o número abaixo. */
-const VERSION = "stat-lab-v4";
+const VERSION = "stat-lab-v5";
 // Todos os apps dividem andrebacchi.github.io: apague só os caches deste app.
 const PREFIX = VERSION.replace(/v\d+$/, "");
 const APP = ["./", "./index.html", "./manifest.json", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-512.png", "./icons/apple-touch-icon.png"];
