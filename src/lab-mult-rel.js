@@ -1,7 +1,7 @@
 /* ===================== MÚLTIPLAS COMPARAÇÕES ===================== */
 const MS={corr:"none",ps:[],real:false,agg:null};
 LAB("mult","Inferencial","Múltiplas comparações",`
-<div class="intro"><span class="eyebrow">Inferencial</span><h2>Quanto mais você procura, mais você acha</h2><p>Mesmo sem nenhum efeito real, testes repetidos produzem “descobertas”. Veja quantas, e como corrigir.</p></div>
+<div class="intro"><span class="eyebrow">Inferencial</span><h2>Quanto mais você procura, mais você acha</h2><p>Mesmo sem nenhum efeito real, testes repetidos produzem “descobertas”. Veja quantas, e como corrigir. Nos ensaios clínicos, o mesmo problema aparece quando se fatia o resultado em subgrupos: veja em <a class="lnk" href="https://andrebacchi.github.io/study-lab/#sub" target="_blank" rel="noopener">Subgrupos, no STUDY LAB ›</a></p></div>
 <div class="grid two">
  <div class="card"><div class="card-h"><h3>Chance de pelo menos um falso positivo</h3><button class="more-btn" data-learn="mult">Saiba mais</button></div>
   <div class="range"><label for="mK">Número de testes (k)</label><output id="mKo"></output><input type="range" id="mK" min="1" max="50" value="10"></div>

@@ -320,6 +320,9 @@ kbd{font-family:var(--f-mono);font-size:12px;background:var(--sunk);border:1px s
 .qr-url{font:600 clamp(15px,4vw,20px)/1.3 "IBM Plex Mono",ui-monospace,monospace;overflow-wrap:anywhere;-webkit-user-select:all;user-select:all}
 .qr-acts{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
 .qr-nota{font-size:12.5px;opacity:.7}
+/* aviso de dados recebidos de outro app da família */
+.linkbox{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin:0 0 16px;font-size:14px;line-height:1.5}
+.linkbox p{margin:0 0 8px;max-width:80ch}
 </style>
 <div class="wrap">
 <header class="top">
@@ -1737,6 +1740,7 @@ const TESTS={
   p:d=>logrank(d.g[0],d.g[1]).p,eff:d=>logrank(d.g[0],d.g[1]).hr,effName:"Hazard ratio (2 vs 1)",trueEff:P=>P.m1/P.m2,
   show(d,S){const r=logrank(d.g[0],d.g[1]),names=d.names.map((n,i)=>nm(n,"Grupo "+(i+1))),K=d.g.map(kmCurve),u=d.unit||"";
    kmPlot(slot(S.main,"Curvas de sobrevida de Kaplan-Meier","Cada degrau é um evento. Traços verticais: participantes censurados (saíram do estudo sem o evento)."),d.g,names,u);
+   S.main.insertAdjacentHTML("beforeend",`<p class="note">Como ler o hazard ratio de um ensaio, e por que ele engana quando as curvas se cruzam: <a class="lnk" href="https://andrebacchi.github.io/study-lab/#medidas" target="_blank" rel="noopener">Medidas de efeito, no STUDY LAB ›</a></p>`);
    S.a.insertAdjacentHTML("beforeend",`<div class="adv"><div class="sub">Eventos observados × esperados</div><div class="tw"><table class="t"><thead><tr><th>Grupo</th><th>n</th><th>Eventos (O)</th><th>Esperados (E)</th><th>O/E</th><th>Mediana</th></tr></thead><tbody>${[0,1].map(i=>`<tr><td>${esc(names[i])}</td><td>${K[i].n}</td><td>${i?r.O2:r.O1}</td><td>${fmt(i?r.E2:r.E1,1)}</td><td>${fmt((i?r.O2:r.O1)/(i?r.E2:r.E1),2)}</td><td>${K[i].med!=null?auto(K[i].med):"não atingida"}</td></tr>`).join("")}</tbody></table></div><p class="note">Se não houvesse diferença, cada grupo teria eventos proporcionais ao número de pessoas em risco a cada momento.</p></div>`);
    nullChi(slot(S.b,"Distribuição de χ² (1 gl) se as curvas fossem iguais"),r.X,1);
    S.tiles.innerHTML=names.map((n,i)=>tile(n,K[i].med!=null?auto(K[i].med)+(u?" "+u:""):"não atingida",`mediana · ${K[i].ev} eventos em ${K[i].n}`)).join("")+tile("Log-rank χ²",fmt(r.X,2),"gl = 1")+tile("p",pv(r.p),"",r.p<TS.alpha?"acc":"")+(r.ok?tile("Hazard ratio",fmt(r.hr,2),`${names[1]} vs ${names[0]} · IC 95%: ${fmt(r.hrlo,2)} a ${fmt(r.hrhi,2)} (Cox)`,"acc"):"");
@@ -1963,7 +1967,7 @@ function loadState(){try{const S=JSON.parse(localStorage.getItem("statlab.data")
 /* ===================== MÚLTIPLAS COMPARAÇÕES ===================== */
 const MS={corr:"none",ps:[],real:false,agg:null};
 LAB("mult","Inferencial","Múltiplas comparações",`
-<div class="intro"><span class="eyebrow">Inferencial</span><h2>Quanto mais você procura, mais você acha</h2><p>Mesmo sem nenhum efeito real, testes repetidos produzem “descobertas”. Veja quantas, e como corrigir.</p></div>
+<div class="intro"><span class="eyebrow">Inferencial</span><h2>Quanto mais você procura, mais você acha</h2><p>Mesmo sem nenhum efeito real, testes repetidos produzem “descobertas”. Veja quantas, e como corrigir. Nos ensaios clínicos, o mesmo problema aparece quando se fatia o resultado em subgrupos: veja em <a class="lnk" href="https://andrebacchi.github.io/study-lab/#sub" target="_blank" rel="noopener">Subgrupos, no STUDY LAB ›</a></p></div>
 <div class="grid two">
  <div class="card"><div class="card-h"><h3>Chance de pelo menos um falso positivo</h3><button class="more-btn" data-learn="mult">Saiba mais</button></div>
   <div class="range"><label for="mK">Número de testes (k)</label><output id="mKo"></output><input type="range" id="mK" min="1" max="50" value="10"></div>
@@ -2243,8 +2247,25 @@ $("howBtn").onclick=()=>openSheet("Como usar o STAT LAB",`<p>O STAT LAB é um la
 <p class="src">Os cálculos seguem os mesmos métodos do R e do jamovi (conferidos). Pequenas diferenças podem surgir em testes por postos com amostras pequenas e empates, onde os programas escolhem entre p exato e aproximado.</p>`);
 let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>R[cur]&&R[cur](),150);});
 loadState();
+/* Ligações da família BACCHI LAB: números no endereço (?a=&b=&c=&d=), tela depois do # (testes-chi, testes-fisher, testes-mcn),
+   origem em "de". Lê uma vez, valida, limpa o endereço e mostra um aviso. Hoje só o 2×2 LAB envia. */
+const ORIGEM={"2-2-lab":"2×2 LAB"};
+function fromLink(){let q;try{q=new URLSearchParams(location.search);}catch(e){return null;}if(![..."abcd"].some(k=>q.has(k)))return null;
+  try{history.replaceState(null,"",location.pathname+location.hash);}catch(e){}
+  const n=k=>{const v=Number(q.get(k));return Number.isInteger(v)&&v>=0&&v<=1e6?v:null;},v=[..."abcd"].map(n);if(v.some(x=>x===null)||v[0]+v[1]+v[2]+v[3]<1)return null;
+  const txt=k=>String(q.get(k)||"").replace(/[<>"&]/g,"").trim().slice(0,40),[a,b,c,d]=v,ex=txt("ex"),ds=txt("ds"),de=ORIGEM[q.get("de")]||"outro app";
+  const test=((location.hash||"").match(/^#testes-(chi|fisher|mcn)$/)||[])[1]||"chi";
+  try{history.replaceState(null,"",location.pathname+"#testes-"+test);}catch(e){}
+  if(test==="mcn")TD.mcn={t:[[a,b],[c,d]],lab:["Sim","Não"],pi:-1};
+  else TD.tab={t:[[a,b],[c,d]],rn:ex?[ex+": sim",ex+": não"]:["Exposto","Não exposto"],cn:ds?[ds+": sim",ds+": não"]:["Com desfecho","Sem desfecho"],pi:-1};
+  SIMP[test==="mcn"?"mcn":"tab"]=null;
+  return{test,de,a,b,c,d};}
+function linkBanner(L){if(!L)return;const N=L.a+L.b+L.c+L.d,box=document.createElement("div");box.className="linkbox";box.id="linkBanner";box.setAttribute("role","status");
+  box.innerHTML=`<p><b>Recebido do ${L.de}:</b> a tabela ${L.a} · ${L.b} · ${L.c} · ${L.d} (N = ${N}). `+(L.test==="mcn"?`Ela foi lida como pares: nas linhas, a primeira medida; nas colunas, a segunda. Só os pares discordantes (${L.b} e ${L.c}) entram no teste.`:`Use <b>Ver com ${TESTS[L.test==="chi"?"fisher":"chi"].name}</b> para comparar os dois testes.`)+` No modo <b>Completo</b> aparecem a distribuição de referência e a simulação de mil estudos.</p><button class="btn small" id="linkClose">Entendi</button>`;
+  const intro=document.querySelector("#lab-testes .intro");intro&&intro.after(box);$("linkClose").onclick=()=>box.remove();}
+const LINK=fromLink();
 function fromHash(){const h=(location.hash||"").slice(1),[lab,sub]=h.split("-");go(LABS.some(l=>l.id===lab)?lab:"var");if(lab==="testes"&&sub&&TESTS[sub])selectTest(sub);}
-fromHash();window.addEventListener("hashchange",()=>{fromHash();window.scrollTo({top:0});});
+fromHash();linkBanner(LINK);window.addEventListener("hashchange",()=>{fromHash();window.scrollTo({top:0});});
 
 (function(){let seen=false;try{seen=localStorage.getItem("statlab.intro")==="1";}catch(e){}const w=$("welcome");if(!seen)w.hidden=false;
   const done=()=>{w.hidden=true;try{localStorage.setItem("statlab.intro","1")}catch(e){}};

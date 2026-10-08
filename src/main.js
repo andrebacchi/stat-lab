@@ -20,8 +20,25 @@ $("howBtn").onclick=()=>openSheet("Como usar o STAT LAB",`<p>O STAT LAB é um la
 <p class="src">Os cálculos seguem os mesmos métodos do R e do jamovi (conferidos). Pequenas diferenças podem surgir em testes por postos com amostras pequenas e empates, onde os programas escolhem entre p exato e aproximado.</p>`);
 let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>R[cur]&&R[cur](),150);});
 loadState();
+/* Ligações da família BACCHI LAB: números no endereço (?a=&b=&c=&d=), tela depois do # (testes-chi, testes-fisher, testes-mcn),
+   origem em "de". Lê uma vez, valida, limpa o endereço e mostra um aviso. Hoje só o 2×2 LAB envia. */
+const ORIGEM={"2-2-lab":"2×2 LAB"};
+function fromLink(){let q;try{q=new URLSearchParams(location.search);}catch(e){return null;}if(![..."abcd"].some(k=>q.has(k)))return null;
+  try{history.replaceState(null,"",location.pathname+location.hash);}catch(e){}
+  const n=k=>{const v=Number(q.get(k));return Number.isInteger(v)&&v>=0&&v<=1e6?v:null;},v=[..."abcd"].map(n);if(v.some(x=>x===null)||v[0]+v[1]+v[2]+v[3]<1)return null;
+  const txt=k=>String(q.get(k)||"").replace(/[<>"&]/g,"").trim().slice(0,40),[a,b,c,d]=v,ex=txt("ex"),ds=txt("ds"),de=ORIGEM[q.get("de")]||"outro app";
+  const test=((location.hash||"").match(/^#testes-(chi|fisher|mcn)$/)||[])[1]||"chi";
+  try{history.replaceState(null,"",location.pathname+"#testes-"+test);}catch(e){}
+  if(test==="mcn")TD.mcn={t:[[a,b],[c,d]],lab:["Sim","Não"],pi:-1};
+  else TD.tab={t:[[a,b],[c,d]],rn:ex?[ex+": sim",ex+": não"]:["Exposto","Não exposto"],cn:ds?[ds+": sim",ds+": não"]:["Com desfecho","Sem desfecho"],pi:-1};
+  SIMP[test==="mcn"?"mcn":"tab"]=null;
+  return{test,de,a,b,c,d};}
+function linkBanner(L){if(!L)return;const N=L.a+L.b+L.c+L.d,box=document.createElement("div");box.className="linkbox";box.id="linkBanner";box.setAttribute("role","status");
+  box.innerHTML=`<p><b>Recebido do ${L.de}:</b> a tabela ${L.a} · ${L.b} · ${L.c} · ${L.d} (N = ${N}). `+(L.test==="mcn"?`Ela foi lida como pares: nas linhas, a primeira medida; nas colunas, a segunda. Só os pares discordantes (${L.b} e ${L.c}) entram no teste.`:`Use <b>Ver com ${TESTS[L.test==="chi"?"fisher":"chi"].name}</b> para comparar os dois testes.`)+` No modo <b>Completo</b> aparecem a distribuição de referência e a simulação de mil estudos.</p><button class="btn small" id="linkClose">Entendi</button>`;
+  const intro=document.querySelector("#lab-testes .intro");intro&&intro.after(box);$("linkClose").onclick=()=>box.remove();}
+const LINK=fromLink();
 function fromHash(){const h=(location.hash||"").slice(1),[lab,sub]=h.split("-");go(LABS.some(l=>l.id===lab)?lab:"var");if(lab==="testes"&&sub&&TESTS[sub])selectTest(sub);}
-fromHash();window.addEventListener("hashchange",()=>{fromHash();window.scrollTo({top:0});});
+fromHash();linkBanner(LINK);window.addEventListener("hashchange",()=>{fromHash();window.scrollTo({top:0});});
 
 (function(){let seen=false;try{seen=localStorage.getItem("statlab.intro")==="1";}catch(e){}const w=$("welcome");if(!seen)w.hidden=false;
   const done=()=>{w.hidden=true;try{localStorage.setItem("statlab.intro","1")}catch(e){}};
